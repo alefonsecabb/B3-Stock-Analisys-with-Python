@@ -1,18 +1,16 @@
 # Trabalho Prático – Banco de Dados Não Relacional com MongoDB
 ## Sistema de Gestão de Clínica Veterinária
 
-**Aluno:** Alexandre da Fonseca  
+**Alunos:** Alexandre da Fonseca / Riquelmy Henrique Silva / Carlos Eduardo Pereira de Rezende 
 **Curso:** Ciência de Dados – FATEC  
-**Disciplina:** Banco de Dados Não Relacionais  
-**Data:** 22/05/2026  
-
----
+**Disciplina:** Banco de Dados Não Relacionais 
+**Professor:** Higor Antonio Delsoto  
 
 ## 1. Introdução
 
-Este trabalho implementa um banco de dados orientado a documentos utilizando MongoDB para o gerenciamento de uma clínica veterinária. O sistema armazena informações sobre clientes (tutores de animais), animais, veterinários e atendimentos realizados.
+Este trabalho implementa um banco de dados orientado a documentos utilizando MongoDB para o gerenciamento de uma clínica veterinária. O sistema armazena informações sobre clientes, animais, veterinários e atendimentos realizados.
 
-O banco de dados foi nomeado `clinica_vet` e contém quatro coleções principais: `clientes`, `animais`, `veterinarios` e `atendimentos`.
+O banco de dados nomeado `clinica_vet` e contém quatro coleções principais: `clientes`, `animais`, `veterinarios` e `atendimentos`.
 
 Para usar o banco, execute no `mongosh`:
 
@@ -123,7 +121,7 @@ O MongoDB permite dois padrões principais para relacionamentos: **documentos em
 
 ## 3. Inserção de Dados
 
-> **Nota:** Os ObjectIds abaixo são fixos para que as referências entre coleções funcionem de forma consistente ao longo do trabalho.
+> **Nota:** Os ObjectIds abaixo são fixos para que as referências entre coleções funcionem  
 
 ### 3.1 Coleção `clientes`
 
@@ -801,7 +799,7 @@ db.atendimentos.countDocuments()
 
 ### 5.6 Remover todos os atendimentos do tipo "retorno" (remoção múltipla)
 
-> **Atenção:** Exemplo demonstrativo. Não execute se quiser manter os dados para as agregações.
+> **Atenção:** Exemplo demonstrativo. Não execute se quiser manter os dados para poder fazer as agregações depois.
 
 ```js
 db.atendimentos.deleteMany({ tipo: "retorno" })
@@ -1018,7 +1016,7 @@ db.atendimentos.aggregate([
 
 ### Q2 – Por que o histórico de vacinas foi embutido em `animais` e não em uma coleção separada?
 
-O histórico de vacinas é uma informação inerente ao animal — é quase sempre consultado junto com os dados do animal (ex.: "quais vacinas o Rex tomou?"). Como o número de vacinas por animal é limitado e previsível (em média 3 a 6 por ano), o risco de o documento crescer além do limite é baixo. Criar uma coleção separada (`vacinas`) exigiria um `$lookup` a cada consulta, adicionando complexidade e reduzindo a performance sem benefício real neste contexto.
+O histórico de vacinas é uma informação inerente ao animal, é quase sempre consultado junto com os dados do animal (ex.: "quais vacinas o Rex tomou?"). Como o número de vacinas por animal é limitado e previsível (em média 3 a 6 por ano), o risco de o documento crescer além do limite é baixo. Criar uma coleção separada (`vacinas`) exigiria um `$lookup` a cada consulta, adicionando complexidade e reduzindo a performance sem benefício real neste contexto.
 
 ---
 
@@ -1064,3 +1062,7 @@ Para um sistema de clínica com dados variáveis por espécie/raça e forte rela
 O banco de dados `clinica_vet` foi modelado com foco na eficiência de leitura e na naturalidade dos relacionamentos entre entidades veterinárias. A combinação de **documentos embutidos** (endereço, vacinas, medicamentos) com **referências** (cliente→animal, animal→atendimento, veterinário→atendimento) reflete as melhores práticas do MongoDB: embutir o que sempre é lido junto, referenciar o que tem existência independente.
 
 O sistema suporta todas as operações CRUD, consultas simples e complexas com projeção e filtros em campos aninhados, além de pipelines de agregação para relatórios gerenciais.
+
+
+# Declaração do uso de IA
+# Foi utilizado o Claude para geração dos dados fictícios das quatro coleções principais: `clientes`, `animais`, `veterinarios` e `atendimentos`.
