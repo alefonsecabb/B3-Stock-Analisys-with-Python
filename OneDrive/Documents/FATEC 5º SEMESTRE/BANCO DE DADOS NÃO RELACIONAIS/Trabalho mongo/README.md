@@ -1,126 +1,237 @@
-# Banco de Dados Não Relacional – MongoDB
-## Sistema de Gestão de Clínica Veterinária
+<div align="center">
 
-> Trabalho prático da disciplina **Banco de Dados Não Relacionais** – FATEC  
-> Aluno: **Alexandre da Fonseca** | Curso: Ciência de Dados | 5º Semestre | 2026
+# 🐾 Clínica Veterinária — MongoDB
 
----
+### Sistema de Gestão com Banco de Dados Não Relacional
 
-## Sobre o Projeto
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.3-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![PyMongo](https://img.shields.io/badge/PyMongo-4.17-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://pymongo.readthedocs.io/)
+[![FATEC](https://img.shields.io/badge/FATEC-Ciência_de_Dados-003087?style=for-the-badge)](https://fatecsp.br/)
 
-Implementação de um banco de dados orientado a documentos utilizando **MongoDB** para o gerenciamento de uma clínica veterinária fictícia. O sistema modela quatro entidades principais com uso de **documentos embutidos** e **referências**, demonstrando as melhores práticas de modelagem NoSQL.
+<br/>
 
----
+> Trabalho prático da disciplina **Banco de Dados Não Relacionais**  
+> Curso de **Ciência de Dados** · 5º Semestre · 2026  
+> Professor: **Higor Antonio Delsoto**
 
-## Estrutura do Repositório
-
-```
-📦 banco_não_relacional_MongoDB
-├── 📄 README.md                          ← Este arquivo
-├── 📄 trabalho_mongodb_clinica_vet.md    ← Documentação completa do trabalho
-├── 📄 executar_trabalho.py               ← Script Python para popular e consultar o banco
-└── 📄 Proposta de Trabalho_Mongo.docx    ← Enunciado original da atividade
-```
+</div>
 
 ---
 
-## Banco de Dados: `clinica_vet`
+## 👥 Equipe
 
-### Coleções
-
-| Coleção | Registros | Descrição |
+| Aluno | Curso | Semestre |
 |---|---|---|
-| `clientes` | 5 | Tutores dos animais, com endereço embutido |
-| `animais` | 8 | Pets, com histórico de vacinas embutido e referência ao cliente |
-| `veterinarios` | 3 | Profissionais da clínica |
-| `atendimentos` | 10 | Consultas, retornos e emergências, com medicamentos embutidos |
+| Alexandre da Fonseca | Ciência de Dados – FATEC | 5º |
+| Riquelmy Henrique Silva | Ciência de Dados – FATEC | 5º |
+| Carlos Eduardo Pereira de Rezende | Ciência de Dados – FATEC | 5º |
 
-### Estratégia de Modelagem
+---
+
+## 📌 Sobre o Projeto
+
+Este trabalho implementa um **banco de dados orientado a documentos** usando **MongoDB** para gerenciar uma clínica veterinária fictícia chamada `clinica_vet`. O projeto demonstra na prática as principais decisões de modelagem NoSQL — **embedding** vs. **referencing** — com dados realistas, consultas variadas e pipelines de agregação.
+
+O banco cobre o ciclo completo de atendimento: cadastro de clientes e seus animais, agenda de veterinários, histórico de vacinas e registro de consultas com diagnósticos e prescrições.
+
+---
+
+## 🗂️ Estrutura do Repositório
 
 ```
-clientes
-  └── endereco { }            ← embedding (sempre lido junto)
-
-animais
-  ├── id_cliente → clientes   ← reference (entidade independente)
-  └── historico_vacinas [ ]   ← embedding (pertence ao animal, tamanho limitado)
-
-atendimentos
-  ├── id_animal  → animais    ← reference (ciclo de vida próprio)
-  ├── id_veterinario → vets   ← reference (entidade independente)
-  └── medicamentos_prescritos [ ] ← embedding (específicos do atendimento)
+🐾 banco_nao_relacional_MongoDB/
+│
+├── 📄 README.md                           ← Visão geral do projeto (este arquivo)
+├── 📋 trabalho_mongodb_clinica_vet.md     ← Documentação completa (schemas, queries, respostas)
+├── 📑 trabalho_mongodb_clinica_vet.pdf    ← Versão PDF da documentação
+├── 🐍 gerar_pdf.py                        ← Script para gerar o PDF a partir do markdown
+├── 🐍 executar_trabalho.py                ← Script Python para popular e testar o banco
+└── 📝 Proposta de Trabalho_Mongo.docx     ← Enunciado original da atividade
 ```
 
 ---
 
-## Conteúdo da Documentação
+## 🏗️ Modelagem do Banco de Dados
 
-O arquivo [`trabalho_mongodb_clinica_vet.md`](./trabalho_mongodb_clinica_vet.md) contém:
+O banco `clinica_vet` é composto por **4 coleções** com uma estratégia híbrida de embedding e referências:
 
-1. **Modelagem** – schemas das 4 coleções e justificativas de embedding vs. referência
-2. **Inserção de dados** – comandos `insertMany` com dados reais para todas as coleções
-3. **Consultas `find()`** – 10 queries variadas (filtros, projeção, campos aninhados, arrays, ordenação, intervalo de datas)
-4. **Atualizações e remoções** – `$set`, `$push` em arrays embutidos, `deleteOne`, `deleteMany`
-5. **Agregações** – 5 pipelines com `$group`, `$lookup`, `$unwind`, `$project`, `$sort`
-6. **Questões conceituais** – 5 respostas sobre modelagem NoSQL, embedding vs. referencing, integridade referencial
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                          clinica_vet                                │
+├──────────────┬──────────────┬───────────────┬───────────────────────┤
+│   clientes   │    animais   │  veterinarios │     atendimentos      │
+│──────────────│──────────────│───────────────│───────────────────────│
+│ _id          │ _id          │ _id           │ _id                   │
+│ nome         │ nome         │ nome          │ data_atendimento      │
+│ cpf          │ especie      │ crmv          │ id_animal ──────────► │
+│ telefone     │ raca         │ especialidade │ id_veterinario ─────► │
+│ email        │ sexo         │ telefone      │ tipo                  │
+│ endereco {}  │ peso_kg      │ email         │ diagnostico           │
+│   logradouro │ id_cliente ► │ horarios []   │ medicamentos []       │
+│   bairro     │ historico_   │               │ valor_consulta        │
+│   cidade     │   vacinas [] │               │ tem_retorno           │
+│ data_cad.    │              │               │ data_retorno          │
+└──────────────┴──────────────┴───────────────┴───────────────────────┘
+                     ► = referência (ObjectId)
+                     {} = documento embutido
+                     [] = array embutido
+```
+
+### 🔗 Decisões de Modelagem
+
+| Campo | Estratégia | Justificativa |
+|---|---|---|
+| `endereco` em `clientes` | 📦 **Embutido** | Sempre lido junto com o cliente; sem existência independente |
+| `historico_vacinas` em `animais` | 📦 **Embutido** | Pertence ao animal, tamanho limitado e previsível |
+| `medicamentos_prescritos` em `atendimentos` | 📦 **Embutido** | Específicos de cada atendimento, não reutilizados |
+| `id_cliente` em `animais` | 🔗 **Referência** | Cliente existe independentemente; evita duplicação |
+| `id_animal` em `atendimentos` | 🔗 **Referência** | Animal tem múltiplos atendimentos; normaliza os dados |
+| `id_veterinario` em `atendimentos` | 🔗 **Referência** | Veterinário tem ciclo de vida independente |
 
 ---
 
-## Como Executar
+## 📊 Coleções e Dados
+
+| Coleção | Documentos | Destaques |
+|---|---|---|
+| 🧑‍💼 `clientes` | 5 | Endereço completo embutido; todos em São Paulo |
+| 🐶 `animais` | 8 | Cães, gatos e um coelho; histórico de vacinas embutido |
+| 🩺 `veterinarios` | 3 | Clínica geral, dermatologia e ortopedia |
+| 📋 `atendimentos` | 10 | Consultas, retornos e emergências; com prescrições |
+
+### 🐾 Animais cadastrados
+
+| Nome | Espécie | Raça | Tutor |
+|---|---|---|---|
+| Rex | Cão | Pastor Alemão | Ana Paula Souza |
+| Bolinha | Gato | Persa | Ana Paula Souza |
+| Thor | Cão | Golden Retriever | Carlos Eduardo Lima |
+| Mimi | Gato | Siamês | Carlos Eduardo Lima |
+| Pingo | Cão | Poodle | Fernanda Rodrigues |
+| Nina | Coelho | Mini Lop | Fernanda Rodrigues |
+| Simba | Gato | Maine Coon | Roberto Alves Santos |
+| Duque | Cão | Rottweiler | Roberto Alves Santos |
+
+---
+
+## 📚 Conteúdo da Documentação
+
+O arquivo [`trabalho_mongodb_clinica_vet.md`](./trabalho_mongodb_clinica_vet.md) cobre:
+
+### 1️⃣ Modelagem das Coleções
+Schemas JSON das 4 coleções com decisões documentadas de embedding vs. referencing.
+
+### 2️⃣ Inserção de Dados
+Comandos `insertMany` com ObjectIds fixos para garantir consistência das referências entre coleções.
+
+### 3️⃣ Consultas `find()` — 10 queries
+- Filtros simples e compostos
+- Projeção de campos
+- Consulta em campos de documentos embutidos (`endereco.cidade`)
+- Consulta em arrays embutidos (`historico_vacinas.vacina`)
+- Filtros por intervalo de datas
+- Ordenação por valor
+
+### 4️⃣ Atualizações e Remoções
+- `updateOne` com `$set` para campos simples
+- `updateOne` com `$push` para inserir em arrays embutidos
+- `deleteOne` e `deleteMany`
+
+### 5️⃣ Agregações — 5 pipelines
+| Pipeline | Operadores |
+|---|---|
+| Contagem de animais por espécie | `$group`, `$sort` |
+| Valor médio por veterinário | `$group`, `$lookup`, `$unwind`, `$project` |
+| Total de atendimentos por tipo | `$group`, `$sort` |
+| Faturamento mensal | `$group` com `$year`/`$month`, `$concat` |
+| Top animais com mais atendimentos | `$group`, `$lookup`, `$unwind` |
+
+### 6️⃣ Questões Conceituais
+5 respostas teóricas sobre embedding vs. referencing, integridade referencial no MongoDB e vantagens sobre bancos relacionais.
+
+---
+
+## 🚀 Como Executar
 
 ### Pré-requisitos
 
-- MongoDB Server 6+ rodando em `localhost:27017`
-- Python 3.10+
-- PyMongo instalado
+- ✅ MongoDB Server 6+ rodando em `localhost:27017`
+- ✅ Python 3.10+
+- ✅ PyMongo instalado
 
 ```bash
 pip install pymongo
 ```
 
-### Populando e testando o banco
+### ▶️ Populando e testando o banco
 
 ```bash
 python executar_trabalho.py
 ```
 
-O script:
-- Dropa e recria as 4 coleções (idempotente)
-- Insere todos os documentos com ObjectIds fixos
-- Executa todas as consultas e imprime os resultados
-- Executa todas as atualizações/remoções
-- Executa todas as agregações
+O script executa de forma idempotente:
+1. 🗑️ Dropa e recria as 4 coleções
+2. 📥 Insere todos os documentos com ObjectIds fixos
+3. 🔍 Executa e imprime todas as consultas `find()`
+4. ✏️ Executa todas as atualizações e remoções
+5. 📊 Executa e imprime todos os pipelines de agregação
 
-### Acessando via MongoDB Compass
+### 🧭 Acessando via MongoDB Compass
 
 1. Abra o **MongoDB Compass**
 2. Conecte em `mongodb://localhost:27017`
 3. Selecione o banco `clinica_vet`
+4. Explore as coleções e rode queries na aba **Aggregations**
+
+### 📑 Gerando o PDF da documentação
+
+```bash
+pip install markdown xhtml2pdf
+python gerar_pdf.py
+```
+
+O PDF será salvo como `trabalho_mongodb_clinica_vet.pdf` na mesma pasta.
 
 ---
 
-## Tecnologias
+## 🛠️ Tecnologias
 
-![MongoDB](https://img.shields.io/badge/MongoDB-8.3-47A248?style=flat&logo=mongodb&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)
-![PyMongo](https://img.shields.io/badge/PyMongo-4.17-47A248?style=flat)
+| Tecnologia | Versão | Uso |
+|---|---|---|
+| [MongoDB](https://www.mongodb.com/) | 8.3 | Banco de dados orientado a documentos |
+| [Python](https://www.python.org/) | 3.12 | Scripts de população e geração de PDF |
+| [PyMongo](https://pymongo.readthedocs.io/) | 4.17 | Driver Python para MongoDB |
+| [xhtml2pdf](https://xhtml2pdf.readthedocs.io/) | — | Geração de PDF a partir de HTML/CSS |
+| [Markdown](https://python-markdown.github.io/) | 3.x | Conversão de markdown para HTML |
 
 ---
 
-## Distribuição de Pontos (10 pts)
+## 📝 Critérios de Avaliação
 
-| Critério | Peso |
+| Critério | Pontuação |
 |---|---|
-| Modelagem das coleções | 1,0 |
-| Inserção correta dos documentos | 1,5 |
-| Uso de documentos embutidos | 1,0 |
-| Uso de referências | 1,0 |
-| Consultas `find()` | 1,5 |
-| Atualizações e remoções | 1,0 |
-| Consultas `aggregate()` | 1,5 |
-| Respostas conceituais e justificativas | 1,0 |
-| Organização da entrega | 0,5 |
+| Modelagem das coleções | 1,0 pt |
+| Inserção correta dos documentos | 1,5 pt |
+| Uso de documentos embutidos | 1,0 pt |
+| Uso de referências entre coleções | 1,0 pt |
+| Consultas `find()` | 1,5 pt |
+| Atualizações e remoções | 1,0 pt |
+| Consultas `aggregate()` | 1,5 pt |
+| Respostas conceituais e justificativas | 1,0 pt |
+| Organização da entrega | 0,5 pt |
+| **Total** | **10,0 pt** |
 
 ---
 
-*Disciplina ministrada na FATEC – 2026*
+## 🤖 Declaração de Uso de IA
+
+Os dados fictícios das quatro coleções (`clientes`, `animais`, `veterinarios` e `atendimentos`) foram gerados com auxílio do **Claude (Anthropic)**.
+
+---
+
+<div align="center">
+
+Feito com ☕ e 🐾 &nbsp;·&nbsp; FATEC · Ciência de Dados · 2026
+
+</div>
