@@ -1,53 +1,13 @@
  Clínica Veterinária — MongoDB
 Sistema de Gestão com Banco de Dados Não Relacional
-MongoDB Python PyMongo FATEC
+MongoDB Python PyMongo
 
-
-Trabalho prático da disciplina Banco de Dados Não Relacionais
-Curso de Ciência de Dados · 5º Semestre · 2026
-Professor: Higor Antonio Delsoto
-
-👥 Equipe
-Aluno	Curso	Semestre
-Alexandre da Fonseca	Ciência de Dados – FATEC	5º
-Riquelmy Henrique Silva	Ciência de Dados – FATEC	5º
-Carlos Eduardo Pereira de Rezende	Ciência de Dados – FATEC	5º
 📌 Sobre o Projeto
 Este trabalho implementa um banco de dados orientado a documentos usando MongoDB para gerenciar uma clínica veterinária fictícia chamada clinica_vet. O projeto demonstra na prática as principais decisões de modelagem NoSQL — embedding vs. referencing — com dados realistas, consultas variadas e pipelines de agregação.
 
 O banco cobre o ciclo completo de atendimento: cadastro de clientes e seus animais, agenda de veterinários, histórico de vacinas e registro de consultas com diagnósticos e prescrições.
 
-🗂️ Estrutura do Repositório
-🐾 banco_nao_relacional_MongoDB/
-│
-├── 📄 README.md                           ← Visão geral do projeto (este arquivo)
-├── 📋 trabalho_mongodb_clinica_vet.md     ← Documentação completa (schemas, queries, respostas)
-├── 📑 trabalho_mongodb_clinica_vet.pdf    ← Versão PDF da documentação
-├── 🐍 gerar_pdf.py                        ← Script para gerar o PDF a partir do markdown
-├── 🐍 executar_trabalho.py                ← Script Python para popular e testar o banco
-└── 📝 Proposta de Trabalho_Mongo.docx     ← Enunciado original da atividade
-🏗️ Modelagem do Banco de Dados
-O banco clinica_vet é composto por 4 coleções com uma estratégia híbrida de embedding e referências:
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                          clinica_vet                                │
-├──────────────┬──────────────┬───────────────┬───────────────────────┤
-│   clientes   │    animais   │  veterinarios │     atendimentos      │
-│──────────────│──────────────│───────────────│───────────────────────│
-│ _id          │ _id          │ _id           │ _id                   │
-│ nome         │ nome         │ nome          │ data_atendimento      │
-│ cpf          │ especie      │ crmv          │ id_animal ──────────► │
-│ telefone     │ raca         │ especialidade │ id_veterinario ─────► │
-│ email        │ sexo         │ telefone      │ tipo                  │
-│ endereco {}  │ peso_kg      │ email         │ diagnostico           │
-│   logradouro │ id_cliente ► │ horarios []   │ medicamentos []       │
-│   bairro     │ historico_   │               │ valor_consulta        │
-│   cidade     │   vacinas [] │               │ tem_retorno           │
-│ data_cad.    │              │               │ data_retorno          │
-└──────────────┴──────────────┴───────────────┴───────────────────────┘
-                     ► = referência (ObjectId)
-                     {} = documento embutido
-                     [] = array embutido
 🔗 Decisões de Modelagem
 Campo	Estratégia	Justificativa
 endereco em clientes	📦 Embutido	Sempre lido junto com o cliente; sem existência independente
