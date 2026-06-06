@@ -1,4 +1,4 @@
-name: Atualizar Dados de Mercado
+name: Atualizar Dados e Publicar Site
 
 on:
   schedule:
@@ -7,14 +7,16 @@ on:
   workflow_dispatch:  # permite disparo manual
 
 jobs:
-  update:
+  update-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Checkout repositório
+      - name: Checkout branch main
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # necessário para fazer push do gh-pages
 
       - name: Configurar Python 3.12
         uses: actions/setup-python@v5
@@ -25,19 +27,54 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('OneDrive/Documents/Projeto_Analise_Mercado/requirements.txt') }}
           restore-keys: ${{ runner.os }}-pip-
 
       - name: Instalar dependências
-        run: pip install -r requirements.txt
+        run: pip install -r "OneDrive/Documents/Projeto_Analise_Mercado/requirements.txt"
 
       - name: Gerar arquivos de dados
-        run: python scripts/generate_data.py
+        run: python "OneDrive/Documents/Projeto_Analise_Mercado/scripts/generate_data.py"
 
-      - name: Commitar e publicar se houver mudanças
+      - name: Configurar git
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/
-          git diff --staged --quiet || git commit -m "chore: atualizar dados de mercado $(date -u +'%Y-%m-%d')"
-          git push
+
+      - name: Publicar site e dados no branch gh-pages
+        run: |
+          PROJECT="OneDrive/Documents/Projeto_Analise_Mercado"
+
+          # Copiar arquivos do site + dados para diretório temporário
+          mkdir -p /tmp/deploy/data
+          cp "$PROJECT/index.html" /tmp/deploy/
+          cp "$PROJECT/style.css"  /tmp/deploy/
+          cp "$PROJECT/app.js"     /tmp/deploy/
+          cp "$PROJECT/data/"*.json /tmp/deploy/data/
+          touch /tmp/deploy/.nojekyll
+
+          # Mudar para o branch gh-pages
+          git fetch origin gh-pages
+          git checkout gh-pages
+
+          # Atualizar arquivos
+          cp /tmp/deploy/index.html .
+          cp /tmp/deploy/style.css  .
+          cp /tmp/deploy/app.js     .
+          cp /tmp/deploy/.nojekyll  .
+          mkdir -p data
+          cp /tmp/deploy/data/*.json data/
+
+          git add index.html style.css app.js .nojekyll data/
+          git diff --staged --quiet \
+            || git commit -m "deploy: atualizar site e dados $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push origin gh-pages
+
+      - name: Commitar data/ no main se houver mudanças
+        run: |
+          git checkout main
+          PROJECT="OneDrive/Documents/Projeto_Analise_Mercado"
+          git add "$PROJECT/data/"
+          git diff --staged --quiet \
+            || git commit -m "chore: atualizar dados de mercado $(date -u +'%Y-%m-%d')"
+          git push origin main
